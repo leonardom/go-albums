@@ -12,7 +12,7 @@ import (
 	"github.com/joho/godotenv"
 )
 
-const SERVER_PORT = 8000
+const DEFAULT_PORT = "8000"
 
 var db *sql.DB
 
@@ -25,6 +25,10 @@ type Album struct {
 
 func main() {
 	err := godotenv.Load()
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = DEFAULT_PORT
+	}
 	dbUrl := fmt.Sprintf("%v:%v@tcp(%v:%v)/%v", os.Getenv("DB_USER"), os.Getenv("DB_PASS"),
 		os.Getenv("DB_HOST"), os.Getenv("DB_PORT"), os.Getenv("DB_NAME"))
 	log.Printf("Connecting to db %v...\n", dbUrl)
@@ -34,9 +38,9 @@ func main() {
 	}
 	defer db.Close()
 
-	log.Printf("Server listening on port %v...\n", SERVER_PORT)
+	log.Printf("Server listening on port %v...\n", port)
 	http.HandleFunc("/albums", handleList)
-	http.ListenAndServe(fmt.Sprintf(":%v", SERVER_PORT), nil)
+	http.ListenAndServe(fmt.Sprintf(":%v", port), nil)
 }
 
 func handleList(w http.ResponseWriter, r *http.Request) {
